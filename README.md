@@ -6,7 +6,7 @@ production safeguards, public/private boundary, technology stack, and current
 operating status, then directs readers to the detailed methodology, safety,
 architecture, and design documents in this repository.
 
-**Live read-only demonstration: [forge-view.5.78.193.177.sslip.io](https://forge-view.5.78.193.177.sslip.io)** — production data, no authentication required, and no capability to place orders.
+**Live read-only demonstration: [forge-view.vercel.app](https://forge-view.vercel.app)** — production data, no authentication required, and no capability to place orders.
 
 Forge is an end-to-end automated quantitative research and algorithmic trading
 platform deployed on a single Linux server. The platform systematically
