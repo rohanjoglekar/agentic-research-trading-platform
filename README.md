@@ -94,17 +94,14 @@ banking-style model:
   screen's fair value or the analyst target, so its view is independent;
 - the default engine sends one Message Batches API request per company and
   asks the model only for its assumptions, as JSON in a fixed schema. Python
-  then writes the workbook and computes every case. Against the original
-  headless agent this cut cost about 10× (about $0.03 a model) and matched
-  its base value to within 1%;
+  then writes the workbook and computes every case, matching the original
+  headless agent's base value to within 1%;
 - before a model is published, LibreOffice recalculates the workbook under
   each case. The model is rejected if any formula errors, if the summary
   disagrees with the recalculated cells, if price ≠ (EV − net debt) / shares,
   if bear ≤ base ≤ bull fails, or if WACC, terminal growth, terminal-value
   share or fair value fall outside sane bounds;
-- spending is reserved at worst case before each run and settled at billed
-  cost, under a hard $70 monthly ceiling that an environment variable cannot
-  raise. Scheduled batches stop if fewer than half of a batch pass;
+- scheduled batches stop if fewer than half of a batch pass;
 - new 10-K and 10-Q filings trigger refreshes. Financials, REITs,
   pre-profit companies and non-SEC filers are never modelled. Nearly 170
   models are published on the demo.
@@ -119,7 +116,7 @@ one-line thesis and a one-line risk. The prompt withholds the screen's score,
 tier, DCF and analyst target. Scores enter the grade as weekly percentiles,
 and only once 90% of the universe has a fresh read. The read replaced a
 local-model verdict that covered 35 of 598 names and said SELL on 77% of
-them. The first full run covered 608 names with zero errors for $0.24.
+them. The first full run covered 608 names with zero errors.
 
 ## Options research
 
