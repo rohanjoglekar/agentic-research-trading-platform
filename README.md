@@ -47,7 +47,7 @@ flowchart TB
     linkStyle default stroke:#64748b,stroke-width:2px;
 ```
 
-AI does the reading, the valuation drafting, and the judgment calls on trades
+AI does the reading, the valuation modeling, and the judgment calls on trades
 that have gone wrong. Rules decide every new position. No model output can
 place an order on its own, and the public demo has no path back into trading
 controls.
@@ -56,7 +56,7 @@ controls.
 
 | Part | AI's role | What stays rule-based |
 |---|---|---|
-| **Equity research** | Claude reads every company each week and scores the business; Claude drafts full bear/base/bull DCF models for eligible companies. | The 0–100 grade, its factor weights, and the screen's own DCF. |
+| **Equity research** | Claude reads every company each week and scores the business; Claude creates full bear/base/bull DCF models for eligible companies. | The 0–100 grade, its factor weights, and the screen's own DCF. |
 | **Options research** | An AI analyst researches the 20 best put-selling candidates on the web, writes up the risks, and scores 1–10 how willing it would be to own the shares. | Each contract's score and A–D rating. |
 | **Equity trading** | Once a month an AI reviews results against the S&P 500 and adjusts settings, only within fixed limits. | Every buy and sell. The AI never picks stocks. |
 | **Options trading** | When an open trade moves against the book, an agent researches the company and decides whether to hold, close early, or roll. | Which puts to sell, the cash reserve, and hard stops the agent cannot override. |
