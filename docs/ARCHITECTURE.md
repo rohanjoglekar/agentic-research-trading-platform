@@ -1,6 +1,6 @@
 # Architecture — consolidated production deployment
 
-This architecture document describes how Forge's research, trading,
+This architecture document describes how the platform's research, trading,
 application, inference, networking, and deployment components operate together
 on a single four-core, 8 GB Linux VPS. It maps the service topology, resource
 priorities, serialized deployment path, and boundary between the authenticated

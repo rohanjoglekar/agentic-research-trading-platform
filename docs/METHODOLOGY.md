@@ -1,6 +1,6 @@
 # Methodology — statistical validity before strategy promotion
 
-This methodology document defines how Forge determines whether a quantitative
+This methodology document defines how the platform determines whether a quantitative
 strategy result is statistically credible and eligible to advance from
 research into shadow testing and automated paper trading. It covers measured
 transaction costs, chronological data isolation, family-wise multiple-testing
@@ -52,7 +52,7 @@ selection-conditioned results from being presented as out-of-sample evidence.
 
 As the number of candidates increases, selecting the best result will
 eventually clear any fixed significance threshold through chance alone.
-Forge therefore raises the promotion t-statistic floor with the number of
+The platform therefore raises the promotion t-statistic floor with the number of
 concurrent candidates:
 
 ```python

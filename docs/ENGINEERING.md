@@ -1,6 +1,6 @@
-# Engineering case study — Forge
+# Engineering case study — Agentic Research & Trading Platform
 
-This engineering case study explains what Forge demonstrates as a production
+This engineering case study explains what the platform demonstrates as a production
 software project, which technical problems required the most judgment, and
 what evidence an employer can evaluate in this public repository. It is a
 system-level account derived from the private production implementation; it
@@ -9,13 +9,13 @@ account details, or executable control paths.
 
 ## Project scope
 
-Forge combines quantitative research automation, market-data processing,
+The platform combines quantitative research automation, market-data processing,
 statistical validation, model-assisted strategy generation, paper execution,
 operational monitoring, and a full-stack dashboard on one continuously running
 Linux server. The private monorepo spans Python research and trading services,
 typed web applications, broker and venue adapters, local-model workloads,
 service definitions, deployment automation, and more than 700 Python test
-functions distributed across Forge's research, execution, adapter, and product
+functions distributed across the platform's research, execution, adapter, and product
 services.
 
 The engineering objective is not simply to discover a profitable backtest. It
@@ -71,7 +71,7 @@ operational authority.
 
 ## Verification strategy
 
-Forge uses verification appropriate to each boundary rather than treating one
+The platform uses verification appropriate to each boundary rather than treating one
 test suite as sufficient:
 
 - Pure research and accounting logic is exercised through unit and regression

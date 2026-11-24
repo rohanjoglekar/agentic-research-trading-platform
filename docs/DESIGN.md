@@ -1,6 +1,6 @@
 # Design — data integrity as an interface requirement
 
-This design document defines how Forge's dashboard presents quantitative
+This design document defines how the platform's dashboard presents quantitative
 research, trading performance, and operational state without distorting the
 evidence used for model-promotion and execution decisions. It explains the
 interface rules for measurement windows, risk vocabulary, calibrated
@@ -23,7 +23,7 @@ text from every table without removing the caveats themselves.
 
 ## Every metric identifies its measurement window
 
-A performance statistic without a defined time window changes meaning whenever a counter resets or a strategy is replaced. Forge makes the measurement start date part of the data contract. Kalshi performance is calculated from the activation date of the current strategy version, the backend returns that date with each result, and the interface labels every dependent figure with an explicit qualifier such as *since Jul 11*. Because 51% of the account's lifetime orders predate the current strategy, an unlabeled lifetime statistic would combine materially different systems.
+A performance statistic without a defined time window changes meaning whenever a counter resets or a strategy is replaced. The platform makes the measurement start date part of the data contract. Kalshi performance is calculated from the activation date of the current strategy version, the backend returns that date with each result, and the interface labels every dependent figure with an explicit qualifier such as *since Jul 11*. Because 51% of the account's lifetime orders predate the current strategy, an unlabeled lifetime statistic would combine materially different systems.
 
 This rule exposed two defects, the second considerably more serious than the first. A stale component rendered a profit figure beside an equity balance that could not be reconciled against it, because the two values were measured from different starting points. Relabeling the card was the obvious repair.
 
@@ -33,7 +33,7 @@ The operational rule that follows is stronger than the labeling rule that starte
 
 ## Trading modes use one risk vocabulary
 
-Early dashboard sections described equivalent states inconsistently: “LIVE · Alpaca paper” appeared in green, “PAPER · EXECUTING” appeared in red, and “live · disarmed” appeared in lowercase. Forge now expresses operating state through two explicit dimensions: capital mode (`LIVE / PAPER / SHADOW`) and system behavior (`EXECUTING / ADVISORY / DISARMED`).
+Early dashboard sections described equivalent states inconsistently: “LIVE · Alpaca paper” appeared in green, “PAPER · EXECUTING” appeared in red, and “live · disarmed” appeared in lowercase. The dashboard now expresses operating state through two explicit dimensions: capital mode (`LIVE / PAPER / SHADOW`) and system behavior (`EXECUTING / ADVISORY / DISARMED`).
 
 Color encodes financial risk, not activity or success. A service executing with real capital is always red; green is reserved for states that cannot spend money. A label such as “LIVE” may describe current data, but it is never styled in a way that could be mistaken for a safety state.
 
@@ -55,4 +55,4 @@ At common laptop width, the shadow-testing table's win-rate, z-statistic, and P&
 
 ## Static context must survive live-data failure
 
-The public landing page renders its explanatory content without network requests. Live elements, including the three books' P&L and summary statistics, remain absent until the data request succeeds; they do not produce blocking spinners, error cards, or layout movement. A transient backend failure can therefore suppress current numbers, but it cannot prevent a visitor from understanding what Forge is or how it operates.
+The public landing page renders its explanatory content without network requests. Live elements, including each book's P&L and summary statistics, remain absent until the data request succeeds; they do not produce blocking spinners, error cards, or layout movement. A transient backend failure can therefore suppress current numbers, but it cannot prevent a visitor from understanding what the platform is or how it operates.
