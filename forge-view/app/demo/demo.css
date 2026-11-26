@@ -1,0 +1,417 @@
+/* ════════════════════════════════════════════════════════════════════════
+   /demo — the factsheets. Self-contained tokens, scoped to .fs so nothing
+   here touches the research platform.
+
+   Direction: forged steel and ember on white paper. Neutrals are cool
+   graphite and steel; the one warm colour is the ember orange, and it is spent
+   on two things only — the strategy's line in a chart and the wordmark.
+   Type is one family (Archivo); headlines use a slightly expanded cut.
+
+   Chart colours were run through the dataviz palette validator against both
+   surfaces (lightness band, chroma floor, colour-blind separation, contrast):
+     light  ember #D9660A · blue #2a78d6 · aqua #1baf7a   on #ffffff
+     dark   ember #D9700C · blue #3987e5 · aqua #199e70   on #101316
+   Aqua on white sits at 2.8:1, so wherever it appears the value is also
+   printed (segment label + legend).
+   ════════════════════════════════════════════════════════════════════════ */
+
+.fs {
+  color-scheme: light;
+  --fs-canvas: #ffffff;
+  --fs-wash: #f4f6f8;          /* quiet panel behind grouped content */
+  --fs-line: #e1e5ea;          /* hairlines, table rules, chart grid */
+  --fs-line-strong: #c3cad2;   /* the zero baseline, focused borders */
+  --fs-ink: #15191d;           /* primary text */
+  --fs-ink-2: #47515b;         /* secondary text */
+  --fs-ink-3: #6b7580;         /* notes, axis text (4.6:1 on white) */
+  --fs-ember: #d9660a;         /* the strategy — marks only, never text */
+  --fs-steel: #8a949e;         /* the benchmark and other context marks */
+  --fs-blue: #2a78d6;
+  --fs-aqua: #1baf7a;
+  --fs-up: #1a7f37;
+  --fs-down: #cf222e;
+  --fs-focus: #1c5cab;
+
+  --fs-bg: var(--fs-canvas);    /* page background; dashboards set a wash */
+  --fs-max: 1760px;             /* pages use the screen; text keeps its own measure */
+
+  position: relative;
+  z-index: 1;                  /* above the platform's ambient glow */
+  min-height: 100vh;
+  background: var(--fs-bg);
+  color: var(--fs-ink);
+  font-family: var(--font-archivo), "Archivo", "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  font-feature-settings: "kern", "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
+[data-theme="dark"] .fs {
+  color-scheme: dark;
+  --fs-canvas: #101316;
+  --fs-wash: #171b20;
+  --fs-line: #272d34;
+  --fs-line-strong: #3b434c;
+  --fs-ink: #eceff2;
+  --fs-ink-2: #aab3bc;
+  --fs-ink-3: #8a94a0;
+  --fs-ember: #d9700c;
+  --fs-steel: #6f7a86;
+  --fs-blue: #3987e5;
+  --fs-aqua: #199e70;
+  --fs-up: #3fb970;
+  --fs-down: #f0766d;
+  --fs-focus: #86b6ef;
+  --fs-bg: var(--fs-canvas);
+}
+
+/* ── Dashboard pages ───────────────────────────────────────────────────────
+   Everything except the overview. The page drops to a cool wash and content
+   sits in white panels, so a page of figures reads as a dashboard rather than
+   a long document. --fs-canvas becomes the PANEL colour, which keeps chart
+   dot rings and tooltips matched to whatever surface they sit on.
+   Dark values are restated under the theme scope (higher specificity) so the
+   light block below can never leak into dark mode. */
+.fs.fs--dash {
+  --fs-bg: #f1f3f6;
+  --fs-canvas: #ffffff;
+  --fs-wash: #f5f7f9;
+}
+[data-theme="dark"] .fs.fs--dash {
+  --fs-bg: #0b0e11;
+  --fs-canvas: #14181c;
+  --fs-wash: #1b2026;
+  --fs-line: #252b32;
+}
+
+.fs ::selection { background: color-mix(in srgb, var(--fs-ember) 22%, transparent); }
+
+.fs :focus-visible {
+  outline: 2px solid var(--fs-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── Type ──────────────────────────────────────────────────────────────── */
+.fs-display {
+  font-size: clamp(1.9rem, 1.1rem + 3.1vw, 3.25rem);
+  line-height: 1.08;
+  font-weight: 650;
+  font-stretch: 112%;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+  max-width: 24ch;
+}
+.fs-h2 {
+  font-size: 1.375rem;
+  line-height: 1.25;
+  font-weight: 620;
+  font-stretch: 106%;
+  letter-spacing: -0.008em;
+}
+.fs-h3 {
+  font-size: 1.0625rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+.fs-lead {
+  font-size: 1.125rem;
+  line-height: 1.55;
+  color: var(--fs-ink-2);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+.fs-prose { max-width: 64ch; color: var(--fs-ink-2); text-wrap: pretty; }
+.fs-note { font-size: 0.875rem; line-height: 1.45; color: var(--fs-ink-3); }
+.fs-num { font-variant-numeric: tabular-nums; }
+
+/* ── Structure ─────────────────────────────────────────────────────────── */
+.fs-wrap {
+  width: 100%;
+  max-width: var(--fs-max);
+  margin-inline: auto;
+  padding-inline: clamp(20px, 4vw, 72px);
+}
+/* A section is a hairline, then air, then its title. */
+.fs-section {
+  border-top: 1px solid var(--fs-line);
+  padding-top: 28px;
+  margin-top: 56px;
+}
+
+.fs-link {
+  color: var(--fs-ink);
+  font-weight: 560;
+  text-decoration: underline;
+  text-decoration-color: var(--fs-line-strong);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 150ms ease;
+}
+.fs-link:hover { text-decoration-color: var(--fs-ember); }
+
+.fs-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: var(--fs-ink);
+  color: var(--fs-canvas);
+  font-weight: 580;
+  font-size: 0.9375rem;
+  transition: opacity 150ms ease;
+}
+.fs-button:hover { opacity: 0.86; }
+
+/* ── Tables ────────────────────────────────────────────────────────────── */
+.fs-table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.fs-table thead th {
+  text-align: left;
+  font-weight: 560;
+  font-size: 0.8125rem;
+  color: var(--fs-ink-3);
+  padding: 0 12px 10px 0;
+  border-bottom: 1px solid var(--fs-line-strong);
+  white-space: nowrap;
+}
+.fs-table tbody th,
+.fs-table td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--fs-line);
+  vertical-align: baseline;
+  text-align: left;
+  font-weight: 400;
+}
+.fs-table tbody th { color: var(--fs-ink-2); }
+.fs-table thead th.r, .fs-table td.r { text-align: right; padding-right: 0; padding-left: 12px; }
+.fs-table td.r { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fs-table tbody tr:last-child th,
+.fs-table tbody tr:last-child td { border-bottom: 0; }
+
+/* ── Charts ────────────────────────────────────────────────────────────── */
+.fs-chart { position: relative; }
+.fs-chart svg { display: block; overflow: visible; }
+.fs-chart text { font-family: inherit; }
+.fs-axis { fill: var(--fs-ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+/* The charts are deliberately static. An earlier version drew the strategy
+   line in on load; any capture taken mid-load (a background tab, a link
+   preview, a screenshot for a résumé) then showed a chart with no strategy on
+   it. The most important mark on the page is never allowed to be missing. */
+
+.fs-tip {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  min-width: 168px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--fs-canvas);
+  border: 1px solid var(--fs-line-strong);
+  box-shadow: 0 6px 20px rgb(15 20 26 / 0.10);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+[data-theme="dark"] .fs .fs-tip { box-shadow: 0 6px 20px rgb(0 0 0 / 0.45); }
+
+.fs-details > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  font-size: 0.875rem;
+  color: var(--fs-ink-3);
+  text-decoration: underline;
+  text-decoration-color: var(--fs-line-strong);
+  text-underline-offset: 4px;
+}
+.fs-details > summary::-webkit-details-marker { display: none; }
+.fs-details > summary:hover { color: var(--fs-ink); }
+.fs-details[open] > summary { color: var(--fs-ink); }
+
+/* ── Page body spacing ─────────────────────────────────────────────────── */
+.fs-main { padding-top: 48px; padding-bottom: 24px; }
+@media (min-width: 640px) { .fs-main { padding-top: 64px; } }
+.fs--dash .fs-main { padding-top: 28px; }
+@media (min-width: 640px) { .fs--dash .fs-main { padding-top: 36px; } }
+
+/* ── Dashboard pieces ──────────────────────────────────────────────────── */
+.fs-dash-title {
+  font-size: clamp(1.75rem, 1.35rem + 1.3vw, 2.375rem);
+  line-height: 1.1;
+  font-weight: 650;
+  font-stretch: 112%;
+  letter-spacing: -0.018em;
+}
+/* The finding sentence: the page's one line of voice, under the title. */
+.fs-finding {
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  line-height: 1.35;
+  font-weight: 560;
+  color: var(--fs-ink);
+  max-width: 52ch;
+  text-wrap: balance;
+}
+
+.fs-panel {
+  background: var(--fs-canvas);
+  border: 1px solid var(--fs-line);
+  border-radius: 12px;
+  padding: 18px;
+  min-width: 0;                /* lets tables and charts shrink inside a grid */
+  box-shadow: 0 1px 2px rgb(16 24 32 / 0.04);
+}
+@media (min-width: 640px) { .fs-panel { padding: 22px 24px; } }
+[data-theme="dark"] .fs .fs-panel { box-shadow: none; }
+
+.fs-kpi { padding: 16px 18px; }
+@media (min-width: 640px) { .fs-kpi { padding: 18px 20px; } }
+.fs-kpi-value {
+  font-size: 1.625rem;
+  line-height: 1.1;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+/* Filter controls: one row above the content they scope. */
+.fs-input {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--fs-line-strong);
+  background: var(--fs-canvas);
+  color: var(--fs-ink);
+  font: inherit;
+  font-size: 0.9375rem;
+}
+.fs-input::placeholder { color: var(--fs-ink-3); }
+.fs-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--fs-line-strong);
+  background: var(--fs-canvas);
+  color: var(--fs-ink-2);
+  font-size: 0.875rem;
+  font-weight: 520;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.fs-chip:hover { color: var(--fs-ink); }
+.fs-chip[aria-pressed="true"] { background: var(--fs-ink); border-color: var(--fs-ink); color: var(--fs-canvas); }
+.fs-chip .fs-num { opacity: 0.75; }
+
+/* Selectable table rows: the name is a real button (keyboard reachable);
+   the whole row is the pointer target. */
+.fs-table tr.fs-pick { cursor: pointer; }
+.fs-table tr.fs-pick:hover > * { background: var(--fs-wash); }
+.fs-table tr.fs-pick[aria-current="true"] > * { background: var(--fs-wash); }
+.fs-table tr.fs-pick[aria-current="true"] > :first-child { box-shadow: inset 2px 0 0 var(--fs-ember); }
+.fs-table tr.fs-pick > :first-child { padding-left: 10px; }
+.fs-rowbtn {
+  all: unset;
+  cursor: pointer;
+  font-weight: 560;
+  color: var(--fs-ink);
+}
+.fs-rowbtn:focus-visible { outline: 2px solid var(--fs-focus); outline-offset: 2px; border-radius: 3px; }
+
+/* ── Stock detail panel ────────────────────────────────────────────────── */
+.fs-drawer {
+  background: var(--fs-canvas);
+  border-left: 1px solid var(--fs-line);
+  box-shadow: -16px 0 48px rgb(10 14 18 / 0.16);
+  animation: fs-slide 220ms cubic-bezier(0.2, 0, 0, 1) both;   /* answers the click; off under reduced motion */
+}
+@keyframes fs-slide { from { transform: translateX(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Segmented control (Screen | Valuation). */
+.fs-seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--fs-wash); border: 1px solid var(--fs-line); }
+.fs-seg button {
+  min-height: 36px; padding: 0 16px; border-radius: 8px; border: 0; background: transparent;
+  font: inherit; font-size: 0.9375rem; font-weight: 540; color: var(--fs-ink-2); cursor: pointer;
+}
+.fs-seg button[aria-pressed="true"] { background: var(--fs-canvas); color: var(--fs-ink); box-shadow: 0 1px 2px rgb(16 24 32 / 0.08); }
+
+/* Expanded "why" row inside a table. */
+.fs-table tr.fs-why > td { background: var(--fs-wash); padding: 0; }
+.fs-table tr.fs-open > * { background: var(--fs-wash); }
+
+/* Scroll boxes contain their absolutely-positioned children (screen-reader
+   labels, tooltips) so nothing inside a scrolling table can widen the page. */
+.fs .overflow-x-auto { position: relative; }
+
+/* The research screen's grade column: a little more air on wider screens. */
+.fs-table .fs-gradecol { padding-left: 12px; }
+@media (min-width: 640px) { .fs-table .fs-gradecol { padding-left: 24px; } }
+
+/* The valuation model is wider than the company detail: it holds a spreadsheet. */
+.fs-drawer--wide { max-width: min(1120px, 100vw); }
+@media (min-width: 640px) { .fs-drawer:not(.fs-drawer--wide):not(.fs-drawer--full) { max-width: 560px; } }
+
+/* Spreadsheet tables: the label column stays put while the years scroll. */
+.fs-sheet .fs-table { font-size: 0.875rem; }
+.fs-sheet .fs-table td, .fs-sheet .fs-table tbody th { padding-top: 7px; padding-bottom: 7px; white-space: nowrap; }
+.fs-sheet .fs-sticky {
+  position: sticky; left: 0; z-index: 1;
+  background: var(--fs-canvas);
+  min-width: 210px; max-width: 300px; white-space: normal;
+}
+
+/* A quiet tag beside a symbol: this company has a full valuation model. */
+.fs-tag {
+  display: inline-flex; align-items: center; height: 20px; padding: 0 7px;
+  border-radius: 999px; border: 1px solid color-mix(in srgb, var(--fs-blue) 45%, var(--fs-line));
+  color: var(--fs-ink-2); font-size: 0.6875rem; font-weight: 560; white-space: nowrap; line-height: 1;
+}
+
+/* Factor heat cells: the tint sits on an inner chip so row hover still reads. */
+.fs-table td.fs-heatcell { padding-top: 8px; padding-bottom: 8px; }
+.fs-heat { display: inline-block; min-width: 2.5rem; padding: 4px 8px; border-radius: 4px; text-align: right; color: var(--fs-ink); }
+
+/* Histogram bars are buttons: the bar is the target, the count sits on top. */
+.fs-bin {
+  all: unset; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+  gap: 4px; cursor: pointer; border-radius: 4px 4px 0 0;
+}
+.fs-bin:disabled { cursor: default; }
+.fs-bin:not(:disabled):hover > span:last-child { filter: brightness(0.92); }
+.fs-bin:focus-visible { outline: 2px solid var(--fs-focus); outline-offset: 2px; }
+
+/* A bar row that is also a filter. */
+.fs-barrow {
+  all: unset; box-sizing: border-box; width: calc(100% + 16px); cursor: pointer;
+  display: grid; grid-template-columns: minmax(0, 11rem) 1fr; align-items: center; column-gap: 16px;
+  padding: 5px 8px; margin: 0 -8px; border-radius: 6px; font-size: 0.9375rem;
+}
+.fs-barrow:hover { background: var(--fs-wash); }
+.fs-barrow:focus-visible { outline: 2px solid var(--fs-focus); outline-offset: 0; }
+@media (max-width: 639px) {
+  .fs-sheet .fs-sticky { min-width: 140px; max-width: 170px; }
+  .fs-sheet .fs-table { font-size: 0.8125rem; }
+}
+/* Long labels wrap inside the frozen column instead of running over the numbers
+   (beats the nowrap rule above on specificity). */
+.fs-sheet .fs-table th.fs-sticky, .fs-sheet .fs-table td.fs-sticky { white-space: normal; overflow-wrap: anywhere; }
+
+/* Sliders in the interactive model take the input blue. */
+.fs-range { accent-color: var(--fs-blue); height: 20px; cursor: pointer; }
+
+/* The valuation model is a page of its own: it covers the screen and centres
+   its content in the Overview's column, with open space on both sides. */
+.fs-drawer--full { max-width: none; border-left: 0; box-shadow: none; animation-name: fs-rise; }
+@keyframes fs-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.fs-modelwrap { max-width: var(--fs-max); }
+.fs-back { color: var(--fs-ink-2); }
+.fs-back:hover { color: var(--fs-ink); background: var(--fs-wash); }
+.fs-back:focus-visible { outline: 2px solid var(--fs-focus); outline-offset: 2px; }
+
+/* Page links on phones: one swipeable row, no visible scrollbar. */
+.fs-pagenav { scrollbar-width: none; }
+.fs-pagenav::-webkit-scrollbar { display: none; }

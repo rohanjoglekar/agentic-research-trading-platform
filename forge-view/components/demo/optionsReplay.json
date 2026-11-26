@@ -1,0 +1,134 @@
+{
+  "from": "2024-01-19",
+  "to": "2026-11-20",
+  "account": 100000,
+  "spy_cagr": 14.7,
+  "candidates": 374638,
+  "pass_2pct": 127986,
+  "groups": [
+    {
+      "title": "How a losing trade is handled",
+      "rows": [
+        {
+          "name": "Held to expiry, shares taken if it comes to that",
+          "cagr": 5.2,
+          "mdd": -12.7,
+          "trades": 1253,
+          "win": 81,
+          "live": true
+        },
+        {
+          "name": "Bought back at 2.5 times the payment",
+          "cagr": 4.1,
+          "mdd": -12.5,
+          "trades": 1435,
+          "win": 73,
+          "live": true
+        },
+        {
+          "name": "Bought back only at 4 times the payment",
+          "cagr": 3.0,
+          "mdd": -12.6,
+          "trades": 1300,
+          "win": 79,
+          "live": false
+        }
+      ]
+    },
+    {
+      "title": "When a winning trade is closed",
+      "rows": [
+        {
+          "name": "Once half the payment is earned",
+          "cagr": 3.9,
+          "mdd": -15.4,
+          "trades": 1717,
+          "win": 86,
+          "live": false
+        },
+        {
+          "name": "Once 65% is earned",
+          "cagr": 5.5,
+          "mdd": -13.5,
+          "trades": 1496,
+          "win": 83,
+          "live": false
+        },
+        {
+          "name": "Once 80% is earned",
+          "cagr": 5.2,
+          "mdd": -12.7,
+          "trades": 1253,
+          "win": 81,
+          "live": true
+        },
+        {
+          "name": "Never: held to expiry",
+          "cagr": 6.4,
+          "mdd": -13.2,
+          "trades": 874,
+          "win": 78,
+          "live": false
+        }
+      ]
+    },
+    {
+      "title": "The least a trade must pay",
+      "rows": [
+        {
+          "name": "1% a month",
+          "cagr": 5.1,
+          "mdd": -9.7,
+          "trades": 1188,
+          "win": 88,
+          "live": false
+        },
+        {
+          "name": "2% a month",
+          "cagr": 5.2,
+          "mdd": -12.7,
+          "trades": 1253,
+          "win": 81,
+          "live": true
+        },
+        {
+          "name": "3% a month",
+          "cagr": 3.8,
+          "mdd": -15.5,
+          "trades": 1145,
+          "win": 78,
+          "live": false
+        }
+      ]
+    },
+    {
+      "title": "Which stocks it may trade",
+      "rows": [
+        {
+          "name": "Today's list of about 90, up to $100 a share",
+          "cagr": 5.2,
+          "mdd": -12.7,
+          "trades": 1253,
+          "win": 81,
+          "live": true
+        },
+        {
+          "name": "Today's list, any share price",
+          "cagr": 0.5,
+          "mdd": -14.7,
+          "trades": 1116,
+          "win": 81,
+          "live": false
+        },
+        {
+          "name": "The 300 most-traded US stocks, any share price",
+          "cagr": -3.4,
+          "mdd": -26.2,
+          "trades": 1106,
+          "win": 82,
+          "live": false
+        }
+      ]
+    }
+  ]
+}

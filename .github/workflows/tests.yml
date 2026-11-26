@@ -1,0 +1,46 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Options research, both trading books, valuation engine, weekly reads
+        working-directory: stock-options-ai
+        run: python -m pytest tests -q
+      - name: Equity research screen, screen DCF, public gateway policy
+        working-directory: forge-dashboard/backend
+        run: python -m pytest tests -q
+
+  web:
+    name: Demo pages
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: forge-view
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: forge-view/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      # The build fetches its font over the network; one retry absorbs a failed fetch.
+      - run: npm run build || npm run build

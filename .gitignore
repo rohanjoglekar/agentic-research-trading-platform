@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Secrets and local settings. Nothing in this repository needs a key to run
+# its tests; anything that talks to a broker or a model reads its key from the
+# environment (see .env.example).
+.env
+.env.*
+!.env.example
+
+# Runtime data the jobs write: caches, state, ledgers, generated workbooks.
+# None of it belongs in version control.
+stock-options-ai/*.json
+stock-options-ai/*.csv
+stock-options-ai/data/*.json
+stock-options-ai/data/*.jsonl
+stock-options-ai/logs/
+stock-options-ai/research_cache/
+stock-options-ai/backtests/cache/
+forge-dashboard/data/
+forge-dashboard/backend/data/
+# The scan writes where it is run from.
+scan_results*
+mock_scan_results*
+
+# Front end (no trailing slash: a node_modules symlink must be ignored too)
+node_modules
+.next/
+next-env.d.ts
+*.tsbuildinfo
+
+# OS
+.DS_Store
