@@ -103,8 +103,9 @@ banking-style model:
   share or fair value fall outside sane bounds;
 - scheduled batches stop if fewer than half of a batch pass;
 - new 10-K and 10-Q filings trigger refreshes. Financials, REITs,
-  pre-profit companies and non-SEC filers are never modelled. Nearly 170
-  models are published on the demo.
+  pre-profit companies and non-SEC filers are never modelled. Every other
+  company in the ~600-stock universe is covered: 323 models are published on
+  the demo.
 
 The deep models are advisory. They feed neither the grade nor either trading
 book.
