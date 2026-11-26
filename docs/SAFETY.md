@@ -7,23 +7,31 @@ static screening, process isolation, operating-system sandboxing, execution
 gates, incident-driven regression controls, and public-demo restrictions that
 govern the platform's two highest-risk surfaces.
 
+The code-generation sandbox belongs to the BTC research lab, which was paused
+at the end of August 2026 and whose source is not in this repository; the
+excerpt below is quoted from the private code. The gateway policy described in
+the last section is here, in `forge-dashboard/backend/viewonly.py`.
+
 ## The code-generation sandbox
 
-One research track asks a local language model to generate free-form Python
+One research track asks a language model (a hosted model through a gateway,
+with a local model as the fallback) to generate free-form Python
 implementations of `strategy(df, **params)`, which are evaluated alongside
 other candidates. The platform treats all generated code as untrusted and applies
 four independent containment layers:
 
 1. **AST screening** — Before execution, a static syntax-tree inspection
-   validates imports and attribute access against explicit allowlists and
-   blocklists. Modules such as `os` and `subprocess`, along with dunder-based
-   traversal techniques, are rejected.
+   rejects every import statement and the constructs that hide control flow,
+   checks names against an allowlist and attribute access against a blocklist.
+   Modules such as `os` and `subprocess`, along with dunder-based traversal
+   techniques, are out of reach.
 2. **Process isolation** — Generated code runs in a dedicated subprocess with
    limits on CPU time, memory, output-file size, file descriptors, and child
    processes, and executes at low CPU priority (`nice 15`).
 3. **Non-executable result transport** — The child process writes numeric
    arrays to a file, which the parent reads with `np.load(allow_pickle=False)`.
-   Object serialization and executable deserialization paths are prohibited.
+   Nothing the generated code produces is ever unpickled; the only pickle in
+   the exchange is the job the parent itself writes for the child.
 4. **Operating-system isolation** — On the production server, the subprocess
    runs under bubblewrap:
 
@@ -44,10 +52,11 @@ provides the primary containment guarantee.
 ## Enabling live trading is always a human act
 
 No automated path can transition a strategy directly into live order
-placement. The research pipeline terminates at *proposed*: a human must install
-the strategy, and a human must independently arm the trading service. Live
-execution requires both an execution-mode configuration and a runtime armed
-state. The public build removes all mutating controls at compile time. The
+placement. The research pipeline terminates at *proposed*. Choosing which
+proposed strategy a venue runs is a human decision (the loop only fills an
+empty slot with the current champion), and a human must independently arm the
+trading service: order placement requires both an execution-mode configuration
+and a runtime armed state. The public build renders no mutating control. The
 same principle governs Concordia's capital path: preserve availability when
 safe, but fail closed whenever uncertainty could affect money.
 
@@ -57,12 +66,12 @@ An audit identified an ordering defect on funding-boundary bars: the
 perpetual backtest engine flattened positions before evaluating protective
 exits, silently bypassing stop-loss logic at a point where volatility commonly
 concentrates. Four distinct exit configurations produced identical
-−$5,927.27 results, revealing that their stops had never executed. Two unit
-tests had also encoded the defective behavior as expected output.
+−$5,927.27 results, revealing that their stops had never executed.
 
 The corrected bar loop evaluates protective exits before funding-related
-flattening and is implemented identically in the backtest and live-trading
-services. A gap-through rule further requires trailing stops crossed between
+flattening and is implemented identically in the lab engine, which serves both
+backtests and shadow replay, and in the reference simulator; the two are
+parity-tested. A gap-through rule further requires trailing stops crossed between
 bars to fill at the open rather than at an unavailable stop price. Regression
 tests now assert the corrected ordering. This incident is why shared logic
 between backtesting and shadow testing is treated as a safety property rather
@@ -76,14 +85,21 @@ failure in any single control cannot expose an order-placement path:
 1. **Gateway** — nginx accepts only GET and HEAD. Write requests receive HTTP
    403 before reaching the application, the audit endpoint returns 404, and
    requests are rate-limited by source address.
-2. **Build** — A compile-time view-only flag excludes strategy installation,
-   service arming, and analysis-regeneration controls from the JavaScript
-   bundle rather than hiding them at runtime.
+2. **Build** — A compile-time view-only flag keeps strategy installation,
+   service arming, and analysis-regeneration controls out of everything the
+   public build renders.
 3. **Data** — Public pages expose research outputs and paper-account
-   performance only. Holdings, positions, cost basis, and recommendations
-   derived from live accounts are removed on both server and client paths.
+   performance only. The server enforces this rather than the pages, because
+   a page that hides a field is not a boundary: the gateway is not served the
+   account's namespaces at all (closed by default, with the research routes
+   listed one by one), and ownership and P&L fields are stripped from research
+   answers. Timing counts as data too. The jobs behind the feed used to work
+   through held names first, so the public gets the day of a result and never
+   its timestamp, and a valuation model built for the account is kept out of
+   the public index altogether.
 
 TLS is provided through Let's Encrypt. The bare hostname redirects to the
 public demonstration rather than falling through to the private dashboard's
 authentication prompt, keeping the public and authenticated entry points
-operationally distinct.
+operationally distinct. The canonical public front is now served from Vercel,
+which proxies its API requests to this gateway.

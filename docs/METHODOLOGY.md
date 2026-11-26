@@ -5,9 +5,14 @@ strategy result is statistically credible and eligible to advance from
 research into shadow testing and automated paper trading. It covers measured
 transaction costs, chronological data isolation, family-wise multiple-testing
 correction, versioned market economics, and the retention of negative findings.
-The pipeline has evaluated more than 33,000 strategy variants across 540 days
-of BTC market data, and the overwhelming majority fail. That rejection rate is
-intentional; promotion is reserved for results that remain defensible after
+
+It describes the BTC research lab, the platform's main research program until
+it was paused at the end of August 2026. The lab's source is not in this
+repository; the excerpts below are quoted from the private code as it stands
+today. When this was written the pipeline had evaluated more than 33,000
+strategy variants across 540 days of BTC market data (about 395,000 by the
+time it was paused), and the overwhelming majority failed. That rejection rate
+is intentional; promotion is reserved for results that remain defensible after
 costs, selection effects, and live out-of-sample observation.
 
 ## Trading costs are measured, not assumed
@@ -26,13 +31,15 @@ tail_half_spread_cents: float = 4.25  # deci-cent tick region: p<0.10 or p>0.90
 The original values were 0.5¢ and 0.1¢: superficially plausible assumptions
 that understated observed execution costs by approximately one order of
 magnitude. Analysis of 398 tradable entry-minute quotes found a median full
-spread of approximately 10–11¢, requiring recalibration to 5.0¢ and complete
-repricing of the leaderboard. The venue's highest-ranked strategy moved from
+spread of about 10¢, requiring recalibration to 5.0¢ and complete repricing of
+the leaderboard. The shadow book the pipeline was gating on moved from
 **+$67.53 to −$26.50** under the corrected economics. The result was published
 unchanged. A promotion system is only useful if adverse recalibrations are
-reflected immediately rather than suppressed. The dashboard now displays the
-leading strategy's 6.11¢ break-even spread beside the measured spread because
-the difference between those values defines the remaining execution margin.
+reflected immediately rather than suppressed. A spread-sensitivity study gives
+each variant's break-even half-spread (6.11¢ on validation for the leading
+strategy, against the measured 5.0¢), and the dashboard shows the modelled
+spread beside the observed one: the gap between those values is the remaining
+execution margin.
 
 The original 0.1¢ tail value also exposed a category error: the venue's tick
 size below 10¢ had been treated as its spread. Fine quote increments do not
@@ -42,37 +49,48 @@ imply narrow liquidity; an order book that moves in 0.1¢ ticks can still be
 ## Chronological train, validation, and holdout isolation
 
 Data is divided chronologically into 60% training, 20% validation, and 20%
-holdout segments. Search and refinement are restricted to training data;
-promotion tests operate on validation data; and holdout data is consumed only
-for the final assessment of a candidate that has already cleared every prior
-gate. Dashboard comparisons identify the segment they use, preventing
+holdout segments. Parameters and thresholds are fit on training data. Ranking,
+the choice of which candidates to refine, and every promotion gate read
+validation data. Holdout results are computed and reported for every variant
+but never rank, select or gate one. There is one disclosed exception: a single
+gate threshold was calibrated against holdout on 2026-08-03, which spends a
+little of its independence and is recorded as such beside the setting.
+Dashboard comparisons identify the segment they use, preventing
 selection-conditioned results from being presented as out-of-sample evidence.
 
-## Multiple-testing control across 33,000 variants
+## Multiple-testing control on promotion
 
 As the number of candidates increases, selecting the best result will
 eventually clear any fixed significance threshold through chance alone.
 The platform therefore raises the promotion t-statistic floor with the number of
-concurrent candidates:
+concurrent shadow tests:
 
 ```python
-# algo-trading/btc_lab/pipeline.py
+# algo-trading/btc_lab/pipeline.py (docstring abridged)
 def _mt_floor(n_concurrent: int) -> float:
     """FWER-controlling promotion floor for N concurrent shadow tests: the
     one-sided Bonferroni tail quantile Φ⁻¹(1 − α/N), α=0.05. A pure-null
-    best-of-N clears it only ~5% of the time — unlike √(2·ln N) (the EXPECTED
-    max of N normals, a location statistic that ~half of null batches exceed).
-    At N=1 it is 1.645 (a plain one-sided 5% test); it rises with N."""
+    best-of-N clears it only ~5% of the time.
+    ...
+    At N=1 the Bonferroni form is 1.645 (a plain one-sided 5% test); it rises
+    with N."""
 ```
+
+An earlier version of this docstring, quoted here until November 2026, went on
+to dismiss the √(2·ln N) deflation used by the backtest gate as something
+half of null batches exceed. That was wrong, and the code now says so: at the
+lab's scale that rule is a family-wise test at roughly 10%, close to this one.
 
 The underlying statistic is a t-test on the mean P&L of each strategy's
 **realized payoff distribution**, net of fees and measured spread. This
 replaced a fixed hold-to-expiry break-even win rate that was structurally
 inapplicable to seven of ten live strategies; a strategy with protective exits
-does not share the 52.5% break-even rate of a hold-to-expiry strategy. The
-concurrent test count, N, is fixed when a strategy enters shadow testing so
-that subsequent growth in the candidate pool cannot retroactively alter the
-evidentiary threshold under which observations were collected.
+does not share the break-even rate of a hold-to-expiry strategy (52.5% under
+the original spread assumption, 57.0% under the measured one). The concurrent
+test count, N, is seeded when a strategy enters shadow testing and afterwards
+only rises, to the live count of concurrent shadow tests. It never falls when
+competitors are evicted, so a survivor is not judged at the significance of a
+single test.
 
 ## Results are stamped with the economics that produced them
 
@@ -90,11 +108,12 @@ otherwise compatible release.
 Three completed studies produced explicit no-go decisions:
 
 - **Maker viability** — Repriced all 625 perpetual variants under favorable
-  maker assumptions: complete fills at 5 basis points. None achieved holdout
-  significance, so the dependent maker-execution system was not built.
+  maker assumptions: complete entry fills at 5 basis points. None achieved
+  holdout significance, so the maker entry path, already written behind a
+  flag, stays switched off.
 - **Timeframe sensitivity** — Evaluated the perpetual strategy families across
-  1h, 2h, 4h, and 6h bars in 870 experiments, including a half-friction
-  control. None produced a positive result, providing no evidence that the
+  six bar sizes from 1h to 1d: 870 scored configurations, with a fee-sensitivity
+  control. None cleared even the selection bar, providing no evidence that the
   proposed edge existed at another horizon.
 - **BTC/ETH pair trading** — Tested 202 spread-reversion configurations; none
   met the viability threshold.

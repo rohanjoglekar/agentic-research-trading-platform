@@ -8,6 +8,12 @@ dashboard and its public read-only build. The design treats resource
 contention as a first-class constraint so priority-sensitive trading workloads
 remain deterministic on shared hardware.
 
+Most of this was written in August 2026, when the BTC research lab was the
+server's main workload. That lab was paused at the end of that month and its
+source is not in this repository. The equity research, options research and
+the two paper books, whose source is here, run on the same server as scheduled
+jobs.
+
 ## Production topology
 
 ```mermaid
@@ -56,23 +62,26 @@ flowchart TB
 ```
 
 The diagram is intentionally architectural rather than source-level. It shows
-runtime responsibilities, promotion flow, and trust boundaries while
-omitting private package structure, account identifiers, configuration values,
-and venue-specific execution logic.
+runtime responsibilities, promotion flow, and trust boundaries, not package
+structure, and it was drawn for the research lab's promotion pipeline.
 
 ## The service map
 
-- `forge-btc-lab-daemon` — Continuously performs strategy generation,
-  backtesting, admission to live order-free shadow testing, and promotion
-  accounting at low CPU priority (`nice 15`).
-- `forge-knn-perp` and the binary-market shadow service — Generate live-market
-  predictions on 15-minute intervals and occupy the execution path closest to
-  real capital.
+- `forge-btc-lab-daemon` — Until it was paused, continuously performed
+  strategy generation, backtesting, admission to live order-free shadow
+  testing, and promotion accounting at low CPU priority (`nice 15`).
+- `forge-knn-perp` and the binary-market shadow job — Generate live-market
+  predictions (the perpetual runner on each completed hourly bar, the shadow
+  job every 15 minutes) and occupy the execution path closest to real capital.
+- Scheduled jobs (cron and systemd timers) — The morning options scan, the
+  options trader three times each trading day, the equity trader three times
+  each trading day, its weekly review, the weekly AI reads, and the
+  valuation-model batches with their half-hourly collector.
 - `forge-dashboard-api` (:8700) and `forge-dashboard-web` (:3000) — Serve the
   FastAPI and Next.js private dashboard behind nginx Basic Authentication.
-- `forge-view` (:3001) — Serves the public demonstration from the same
-  component tree, compiled in view-only mode and placed behind a GET-only
-  gateway.
+- `forge-view` (:3001) — Serves the public demonstration, a separate Next.js
+  app compiled in view-only mode and placed behind a GET-only gateway. Vercel
+  serves the same app as the canonical public front.
 - Ollama — Provides local inference for research review and generated
   summaries. The runtime permits one loaded model and disables swap
   (`MemorySwapMax=0`) because memory paging makes local inference operationally
@@ -94,7 +103,7 @@ API, and Ollama's approximately 281% model-load spikes from low-priority
 research processes:
 
 ```python
-# algo-trading/btc_lab/loop.py
+# algo-trading/btc_lab/loop.py (docstring abridged)
 def _nonnice_busy_frac(window_s: float) -> float | None:
     """Fraction of TOTAL cpu capacity spent on NON-NICE work over `window_s`.
 
@@ -105,9 +114,8 @@ def _nonnice_busy_frac(window_s: float) -> float | None:
     to do."""
 ```
 
-Following the change, the daemon recorded no spurious yields and evaluated
-eight strategy families during the same wall-clock interval previously lost
-to idle waiting. The implementation retains the one-minute load average as a
+With the change the daemon no longer counts its own low-priority work as
+contention. The implementation retains the one-minute load average as a
 degraded fallback if `/proc/stat` cannot be read, ensuring that monitoring
 failure does not disable throttling entirely.
 
@@ -115,15 +123,15 @@ failure does not disable throttling entirely.
 
 Every push to `main` executes smoke tests through GitHub Actions before
 connecting to the server and invoking `infrastructure/deploy.sh`. The script
-reconciles the checkout to the approved commit, reasserts nginx authentication
+resets the checkout to the tip of `main`, reasserts nginx authentication
 and routing invariants, restarts services affected by changed paths, and
 rebuilds the public application. Two controls originated from production
 incidents:
 
 - **Mutual exclusion.** An automated deployment and a manual build once ran
   `npm` concurrently against the same working tree, corrupting the dependency
-  installation. Automated and manual deployment paths now acquire the same
-  `flock` lock before modifying build state.
+  installation. The deploy script now takes a `flock` lock before modifying
+  build state, and a manual build is expected to take the same lock.
 - **Tracked-artifact verification.** For ten days, the public application
   repeatedly failed after deployment with `next: not found` despite clean
   dependency rebuilds. The root cause was a tracked `node_modules` symlink to
@@ -135,26 +143,29 @@ incidents:
   rule is explicit: when a deployment repeatedly removes an artifact, inspect
   the repository's tracked object type before diagnosing the package manager.
 
-## One component tree, separate public capability
+## A separate public application
 
-The public and private applications share one component tree. A compile-time
-`VIEW_ONLY` flag excludes mutating controls, ensuring that data-integrity and
-presentation fixes reach both surfaces without maintaining a divergent fork.
-The public landing page reads from a dedicated `/api/landing` endpoint that
-returns approximately 2 KB of aggregate counts and downsampled sparkline data;
-the corresponding full-section payloads range from 600 KB to 2.5 MB. Static
+The public application is a separate Next.js app built from a hand-synced copy
+of the dashboard's components. A compile-time `VIEW_ONLY` flag keeps mutating
+controls out of everything it renders. Fixes are made in the dashboard and
+copied across by hand, which has let a stale copy ship a wrong label before.
+The `/demo` pages are their own components, and their source is in this
+repository under `forge-view/`. The public landing page reads from a
+dedicated `/api/landing` endpoint that returns under 2 KB of aggregate counts
+and downsampled sparkline data; the research payload behind the full section
+is about 3 MB. Static
 content renders independently, while live values appear only after a
 successful response, preventing transient API failures from displacing the
 page with loading or error states.
 
 ## Public disclosure boundary
 
-This public architecture describes the control flow necessary to evaluate the
-engineering: how research becomes evidence, how evidence becomes an eligible
-strategy, how eligible strategies reach paper execution, and how production
-state reaches authenticated and public interfaces. It intentionally excludes
-private source code, strategy parameters, credentials, account topology,
-internal hostnames, mutable control endpoints, and operational recovery
-commands. Short excerpts elsewhere in this repository are selected to explain
-a safety or statistical property and are not sufficient to reproduce the
-production system.
+This document describes the control flow needed to evaluate the engineering:
+how research becomes evidence, how evidence becomes an eligible strategy, how
+eligible strategies reach paper execution, and how production state reaches
+the authenticated and public interfaces. The source for the equity research,
+options research and both paper books is in this repository. The API server,
+everything that reads the brokerage account, credentials, internal hostnames,
+mutable control endpoints, operational recovery commands and the research
+lab's own source are not. The short excerpts quoted from that lab explain a
+safety or statistical property and are not enough to reproduce it.
